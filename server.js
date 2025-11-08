@@ -1,32 +1,40 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./db'); // make sure this exists
+const connectDB = require('./db'); // your Mongo connection
 
 const app = express();
 
-// ✅ CORS
+// ✅ CORS configuration
 app.use(cors({
   origin: [
-    "https://lambent-selkie-e1be51.netlify.app",
-    "http://localhost:5173"
+    "https://lambent-selkie-e1be51.netlify.app", // your deployed frontend
+    "http://localhost:5173"                       // local frontend
   ],
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   credentials: true
 }));
 
+// ✅ Body parser
 app.use(express.json());
 
-// ✅ Routes
+// ------------------ ROUTES ------------------
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/products", require("./routes/products"));
 
-// ✅ Test root
-app.get("/", (req,res)=> res.send("API running"));
+// ------------------ ROOT TEST ------------------
+app.get("/", (req, res) => res.send("API running"));
 
-// ✅ Connect to Mongo
-connectDB();
+// ------------------ CONNECT TO MONGO AND START SERVER ------------------
+const startServer = async () => {
+  try {
+    await connectDB(); // ensure DB is connected before starting server
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+};
 
-// ✅ Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, ()=> console.log(`Server running on port ${PORT}`));
+startServer();
