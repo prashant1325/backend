@@ -1,22 +1,15 @@
-// backend/db.js
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const MONGO_URI = process.env.MONGO_URI;
-    if (!MONGO_URI) {
-      throw new Error('❌ MONGO_URI is missing in .env file');
-    }
-
-    await mongoose.connect(MONGO_URI, {
+    await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
-
-    console.log('✅ MongoDB connected successfully');
+    console.log("MongoDB connected");
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
+    console.error("MongoDB connection failed:", err);
+    process.exit(1); // exit process if DB fails
   }
 };
 
