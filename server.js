@@ -1,81 +1,32 @@
-// backend/server.js
-
+require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./db');
+const cors = require('cors');
+const connectDB = require('./db'); // make sure this exists
 
-// ✅ Load environment variables
-dotenv.config();
-
-// ✅ Initialize Express
 const app = express();
 
-// ✅ Connect to MongoDB
+// ✅ CORS
+app.use(cors({
+  origin: [
+    "https://lambent-selkie-e1be51.netlify.app",
+    "http://localhost:5173"
+  ],
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  credentials: true
+}));
+
+app.use(express.json());
+
+// ✅ Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products"));
+
+// ✅ Test root
+app.get("/", (req,res)=> res.send("API running"));
+
+// ✅ Connect to Mongo
 connectDB();
-
-// ✅ CORS Middleware (works with local + deployed frontend)
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:8080",
-"https://lambent-selkie-e1be51.netlify.app/"
-];
-
-// Apply CORS headers
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  // Preflight request
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-
-  next();
-});
-
-// ✅ Body parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
-
-// ✅ Route imports
-const cartRoutes = require("./routes/cart");
-const adminRoutes = require("./routes/admin");
-const featuredRoutes = require("./routes/featuredProducts");
-const sellRoutes = require("./routes/sell");
-const tradeRoutes = require("./routes/trade");
-const authRoutes = require("./routes/auth");
-
-// ✅ API Routes
-app.use("/api/admin", adminRoutes);
-app.use("/api/admin/featured", featuredRoutes);
-app.use("/api/sell", sellRoutes);
-app.use("/api/trades", tradeRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/auth", authRoutes);
-
-// ✅ Root route
-app.get('/', (req, res) => {
-  res.send('🚀 UpStyle API running successfully!');
-});
-
-// ✅ Handle unknown routes
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// ✅ Global error handler
-app.use((err, req, res, next) => {
-  console.error('🔥 Server Error:', err.stack);
-  res.status(500).json({ error: 'Server error', message: err.message });
-});
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🧩 Mongo URI: ${process.env.MONGO_URI ? 'Loaded' : 'Missing!'}`);
-});
+app.listen(PORT, ()=> console.log(`Server running on port ${PORT}`));
