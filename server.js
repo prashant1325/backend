@@ -18,9 +18,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:8080",
   "https://eloquent-rolypoly-c037fd.netlify.app",
-  "https://steady-peony-396f7e.netlify.app"
+  "https://steady-peony-396f7e.netlify.app" // <-- added missing comma before
 ];
 
+// Apply CORS headers
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
