@@ -5,7 +5,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./db');
 
-// ✅ Load environment variables first
+// ✅ Load environment variables
 dotenv.config();
 
 // ✅ Initialize Express
@@ -14,20 +14,21 @@ const app = express();
 // ✅ Connect to MongoDB
 connectDB();
 
-// ✅ CORS Middleware
-// Allows multiple origins including localhost, 127.0.0.1, and deployed frontend
+// ✅ Allowed Frontend Origins
 const allowedOrigins = [
-  "http://localhost:5173",                     // local frontend
-  "http://127.0.0.1:8080",                     // alternate local frontend
-  "https://eloquent-rolypoly-c037fd.netlify.app" // deployed frontend
+  "http://localhost:5173",                           // local dev
+  "http://127.0.0.1:8080",                           // alternate local
+  "https://eloquent-rolypoly-c037fd.netlify.app",   // deployed frontend 1
+  "https://steady-peony-396f7e.netlify.app"        // deployed frontend 2
 ];
 
+// ✅ CORS options
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('CORS policy: This origin is not allowed'));
+      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
     }
   },
   credentials: true, // allow cookies/auth headers
@@ -35,8 +36,7 @@ const corsOptions = {
 
 // Apply CORS to all routes
 app.use(cors(corsOptions));
-// Handle preflight OPTIONS requests
-app.options("*", cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight
 
 // ✅ Body parsers
 app.use(express.json({ limit: '10mb' }));
